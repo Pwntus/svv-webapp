@@ -1,15 +1,15 @@
 <template lang="pug">
+#svv-offline
+  b OFFLINE
 </template>
 
 <script>
 export default {
-  name: 'Logout',
-  mounted () {
-    this.$store.dispatch('App/logout')
-    this.$router.push('/')
-  }
+  name: 'Offline'
 }
 </script>
 
 <style lang="scss">
+#svv-offline {
+}
 </style>

@@ -21,7 +21,7 @@ export default {
   props: {
     pack: {
       type: String,
-      default: 'dark-v9'
+      default: 'light-v9'
     },
     zoom: {
       type: Number,
@@ -82,8 +82,10 @@ export default {
       zoom: this.zoom,
       scrollWheelZoom: true,
       layers: this.layer,
-      attributionControl: false
+      attributionControl: false,
+      zoomControl: false
     })
+    L.control.zoom({position: 'bottomright'}).addTo(this.map)
     this.marker = new L.Marker(this.getCenter).addTo(this.map)
   }
 }
@@ -102,6 +104,10 @@ export default {
       &:hover {
         text-decoration: none;
       }
+    }
+
+    .leaflet-bar {
+      border-color: rgba(68, 79, 85, .2);
     }
   }
 }

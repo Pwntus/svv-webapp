@@ -10,9 +10,14 @@ import '@/assets/css/global.scss'
 Vue.material.registerTheme('default', {
   primary: {
     color: 'orange',
-    hue: '500'  
+    hue: '500'
   },
   accent: 'deep-orange',
   warn: 'red',
   background: 'white'
+})
+
+Vue.material.registerTheme('toolbar', {
+  primary: 'white',
+  background: 'blue-grey'
 })

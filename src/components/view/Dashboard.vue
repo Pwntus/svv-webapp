@@ -1,10 +1,7 @@
 <template lang="pug">
-#svv-dashboard(v-if="userInited")
+#svv-dashboard
   svv-map
-  b Registered things
-  .foo {{ $store.getters['MIC/regThings'] }}
-  b Unregistered things
-  .foo {{ $store.getters['MIC/unregThings'] }}
+  router-view
 </template>
 
 <script>
@@ -12,23 +9,17 @@ import SvvMap from '@/components/svv/Map'
 import { MQTT } from '@/lib/MQTT'
 
 export default {
-  name: 'SvvLogin',
+  name: 'Dashboard',
   components: { SvvMap },
-  data () {
-    return {
+  mounted () {
+    if (this.AppUser == null) {
+      this.$router.push('/')
+      return
     }
-  },
-  watch: {
-    user: function (val) {
-      if (val == -1)
-        this.$router.push('/')
-    },
-    userInited: function (val) {
-      if (val) {
-        MQTT.init(this)
-        this.$store.dispatch('MIC/getThings')
-      }
-    }
+
+    MQTT.init(this)
+    this.$store.dispatch('MIC/init')
+      .catch(() => { this.$router.push('/logout')} )
   }
 }
 </script>

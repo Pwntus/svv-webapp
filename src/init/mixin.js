@@ -11,9 +11,9 @@ Vue.mixin({
   },
   computed: {
     ...mapGetters({
-      appInited:  'App/inited',
-      userInited: 'App/userInited',
-      user:       'App/getUser'
+      AppInited:  'App/inited',
+      AppUser:    'App/user',
+      MicThings:  'MIC/things'
     })
   },
   methods: {

@@ -3,7 +3,7 @@
   svv-init
   svv-snackbar
   svv-toolbar
-  router-view
+  router-view(v-if="AppInited")
 </template>
 
 <script>
@@ -18,7 +18,7 @@ export default {
     SvvToolbar,
     SvvSnackbar
   },
-  beforeMount () {
+  mounted () {
     this.$store.dispatch('App/init')
   }
 }

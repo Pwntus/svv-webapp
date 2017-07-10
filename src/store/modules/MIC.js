@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import * as t from '@/store/mutation-types'
-import { MIC_HOSTNAME } from '@/config'
 import { MIC } from '@/lib/MIC'
 import { MIC_THING_TYPE_ID } from '@/config'
 
@@ -11,13 +10,15 @@ const state = {
 const mutations = {
   [t.MIC_SET_THINGS] (state, value) {
     state.things = []
-
     value.forEach(thing => {
       try {
         state.things.push({
           id: thing._id,
           createdAt: thing._source.createdAt,
-          pos: (typeof thing._source.state.pos === 'undefined') ? 'None,None' : thing._source.state.pos
+          bat: (typeof thing._source.state.bat === 'undefined') ? null : thing._source.state.bat,
+          hum: (typeof thing._source.state.hum === 'undefined') ? null : thing._source.state.hum,
+          tmp: (typeof thing._source.state.tmp === 'undefined') ? null : thing._source.state.tmp,
+          pos: (typeof thing._source.state.pos === 'undefined') ? 'None,None' : thing._source.state.pos,
         })
       } catch (e) {
         return
@@ -27,29 +28,37 @@ const mutations = {
 }
 
 const actions = {
-  getThings ({commit}) {
+  init ({commit}) {
     let payload = {
       action: 'FIND',
       query: {
-        size: 1000,
-        query: {
-          term: {
-            thingType: MIC_THING_TYPE_ID
-          },
+        size: 10,
+        from: 0,
+        sort: {
+          'label.lowercase': 'asc'
+        },
+        filter: {
+          bool: {
+            must: [{
+              term: {
+                thingType: MIC_THING_TYPE_ID
+              }
+            }]
+          }
         }
       }
     }
-
     return new Promise((resolve, reject) => {
       MIC.invoke('ThingLambda', payload)
         .then(data => {
+          let hits = null
           try {
-            let hits = data.hits.hits
-            commit(t.MIC_SET_THINGS, hits)
-            resolve()
+            hits = data.hits.hits
           } catch (e) {
-            reject(e)
+            reject(e.message)
           }
+          commit(t.MIC_SET_THINGS, hits)
+          resolve()
         })
         .catch(err => { reject(err) })
     })

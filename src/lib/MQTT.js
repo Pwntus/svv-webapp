@@ -1,37 +1,31 @@
 import AWSMqtt from 'aws-mqtt-client'
-import { Cognito } from '@/lib/Cognito'
+import { MIC } from '@/lib/MIC'
 
 class MQTTClass {
   init (ctx) {
     this.ctx = ctx
-    this.topic = null
+    this.topic = 'thing-update/StartIoT/191/#'
     this.retries = 0
 
-    Cognito.getCredentials()
-      .then(credentials => {
-        this.mqtt = new AWSMqtt({
-          region:                 Cognito.manifest.Region,
-          accessKeyId:            credentials.accessKeyId,
-          secretAccessKey:        credentials.secretAccessKey,
-          sessionToken:           credentials.sessionToken,
-          endpointAddress:        Cognito.manifest.IotEndpoint,
-          maximumReconnectTimeMs: 8000,
-          protocol:               'wss'
-        })
-        
-        this.mqtt.on('reconnect', () => this.reconnect())
-        this.mqtt.on('connect',   () => this.connect())
-        this.mqtt.on('close',     () => this.close())
-        this.mqtt.on('error',     (e) => this.error(e))
-        this.mqtt.on('message',   (topic, message) => this.message(topic, message))
-      })
-      .catch(err => {
-        this.kill()
-      })
+    this.mqtt = new AWSMqtt({
+      region:                 MIC.manifest.Region,
+      accessKeyId:            MIC.AWS.config.credentials.accessKeyId,
+      secretAccessKey:        MIC.AWS.config.credentials.secretAccessKey,
+      sessionToken:           MIC.AWS.config.credentials.sessionToken,
+      endpointAddress:        MIC.manifest.IotEndpoint,
+      maximumReconnectTimeMs: 8000,
+      protocol:               'wss'
+    })
+    
+    this.mqtt.on('reconnect', () => this.reconnect())
+    this.mqtt.on('connect',   () => this.connect())
+    this.mqtt.on('close',     () => this.close())
+    this.mqtt.on('error',     (e) => this.error(e))
+    this.mqtt.on('message',   (topic, message) => this.message(topic, message))
   }
 
   reconnect () {
-    Cognito.getCredentials().then(() => {
+    MIC.refreshCredentials().then(() => {
       this.retries++
       if (this.retries >= 2) {
         this.ctx.eventBus.$emit('mqtt:message', null, 'Too many retries, closing connection. Is the topic correct?')
@@ -46,7 +40,7 @@ class MQTTClass {
 
   connect () {
     this.ctx.eventBus.$emit('mqtt:connect')
-    this.subscribe('thing-update/StartIoT/00000618')
+    this.subscribe(this.topic)
   }
 
   close () {

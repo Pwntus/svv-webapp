@@ -1,5 +1,5 @@
 <template lang="pug">
-#svv-init(v-if="!appInited")
+#svv-init(v-if="!AppInited")
   .ball
     md-icon hourglass_full
   md-spinner.md-accent(

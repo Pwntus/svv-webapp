@@ -1,5 +1,5 @@
 <template lang="pug">
-#svv-login(v-if="userInited")
+#svv-login
   svv-card(
     :loading="loading"
     :hidden="false"
@@ -35,7 +35,7 @@
 import SvvCard from '@/components/svv/Card'
 
 export default {
-  name: 'SvvLogin',
+  name: 'Login',
   components: { SvvCard },
   data () {
     return {
@@ -44,27 +44,25 @@ export default {
       loading: false
     }
   },
-  watch: {
-    user: function (val) {
-      if (val !== -1)
-        this.$router.push('/dashboard')
-    }
-  },
   methods: {
     login () {
       if (this.username == '' || this.password == '') return
         
       this.loading = true
       let payload = {username: this.username, password: this.password }
-      this.$store.dispatch('Auth/login', payload)
+      this.$store.dispatch('App/login', payload)
         .then(() => {
           this.$router.push('/dashboard')
         })
-        .catch(error => {
-          this.showSnackbar(error)
+        .catch(err => {
+          this.showSnackbar(err)
           this.loading = false
         })
     }
+  },
+  mounted () {
+    if (this.AppUser !== null)
+      this.$router.push('/dashboard')
   }
 }
 </script>

@@ -3,6 +3,8 @@ import Router from 'vue-router'
 import Login from '@/components/view/Login'
 import Logout from '@/components/view/Logout'
 import Dashboard from '@/components/view/Dashboard'
+import Summary from '@/components/view/sub/Summary'
+import Offline from '@/components/view/sub/Offline'
 
 Vue.use(Router)
 
@@ -11,6 +13,11 @@ export default new Router({
   routes: [
     { path: '/', component: Login },
     { path: '/logout', component: Logout },
-    { path: '/dashboard', component: Dashboard }
+    { path: '/dashboard', component: Dashboard,
+      children: [
+        { path: '', component: Summary },
+        { path: 'offline', component: Offline }
+      ]
+    }
   ]
 })

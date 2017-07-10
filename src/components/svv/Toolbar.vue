@@ -1,18 +1,30 @@
 <template lang="pug">
 #svv-toolbar
-  md-toolbar.md-dense.md-transparent(:class="{ scrolled }")
+  md-toolbar.md-dense(
+    :class="{ scrolled }"
+    md-theme="toolbar"
+  )
+    img(src="../../assets/tmp.png")
     h2.md-title(
       @click="$router.push('/')"
-    ) Statens vegvesen
+    ) Road Monitoring
     .flex
     md-button.md-primary(
-      v-if="user == -1 && userInited"
+      v-if="!AppUser"
       @click.native="$router.push('/')"
     ) Sign In
-    md-button.md-primary(
-      v-if="user !== -1 && userInited"
+    md-button.md-icon-button.md-primary(
+      v-if="AppUser"
+      @click.native="$router.push('/dashboard/offline')"
+    )
+      md-icon portable_wifi_off
+      md-tooltip(md-direction="bottom") Inactive Sensors
+    md-button.md-icon-button.md-primary(
+      v-if="AppUser"
       @click.native="$router.push('/logout')"
-    ) Logout
+    )
+      md-icon exit_to_app
+      md-tooltip(md-direction="bottom") Log Out
 </template>
 
 <script>
@@ -46,14 +58,19 @@ export default {
   right: 0;
 
   .md-toolbar {
-    background-color: #FFF;
+    background-color: rgba(68, 79, 85, 1);
 
     &.scrolled {
       -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
       box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
     }
 
+    img {
+      margin-right: 5px;
+    }
+
     .md-title {
+      color: #FFF;
       cursor: pointer;
     }
   }

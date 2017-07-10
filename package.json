@@ -1,5 +1,5 @@
 {
-  "name": "vvs-webapp",
+  "name": "svv-webapp",
   "version": "0.0.1",
   "description": "Statens vegvesen road monitoring project.",
   "author": "Pontus Aurdal <pontus.edvard@gmail.com>",
@@ -10,7 +10,6 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "amazon-cognito-identity-js": "^1.19.0",
     "aws-mqtt-client": "0.0.5",
     "aws-sdk": "^2.82.0",
     "leaflet": "^1.1.0",

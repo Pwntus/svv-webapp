@@ -8,12 +8,7 @@ import SvvLeaflet from '@/components/svv/Leaflet'
 
 export default {
   name: 'SvvMap',
-  components: { SvvLeaflet },
-  computed: {
-    things () {
-      return this.$store.getters['MIC/things']
-    }
-  }
+  components: { SvvLeaflet }
 }
 </script>
 
