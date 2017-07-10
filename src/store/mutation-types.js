@@ -1,0 +1,4 @@
+export const APP_SET_MANIFEST = 'APP_SET_MANIFEST'
+export const APP_SET_USER = 'APP_SET_USER'
+
+export const MIC_SET_THINGS = 'MIC_SET_THINGS'
