@@ -5,6 +5,10 @@
 
 <script>
 import L from 'leaflet'
+import {
+  LEAFLET_PACK,
+  LEAFLET_API_KEY
+} from '@/config'
 
 /* Leaflet marker issue workaround.
  * https://github.com/Leaflet/Leaflet/issues/4968
@@ -18,40 +22,22 @@ L.Icon.Default.mergeOptions({
 
 export default {
   name: 'SvvLeaflet',
-  props: {
-    pack: {
-      type: String,
-      default: 'light-v9'
-    },
-    zoom: {
-      type: Number,
-      default: 13
-    },
-    lat: {
-      type: String,
-      default: '69.6816'
-    },
-    lng: {
-      type: String,
-      default: '18.9771'
-    }
-  },
   data () {
     return {
       map: null,
-      layer: null,
-      marker: null
+      marker: []
     }
   },
   computed: {
     getCenter () {
-      return new L.LatLng(this.lat, this.lng)
+      return new L.LatLng(69.681580, 18.977034)
     },
-    getLayerUrl () {
-      return `https://api.mapbox.com/styles/v1/mapbox/${this.pack}/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoicHdudHVzIiwiYSI6ImNqMDNydGUyZTAwYjIyd3BmMXhid2hmaDgifQ.SqJ9z6hXH0D0w1QxdPU2Hw`
+    getLayer () {
+      let url = `https://api.mapbox.com/styles/v1/mapbox/${LEAFLET_PACK}/tiles/256/{z}/{x}/{y}?access_token=${LEAFLET_API_KEY}`
+      return new L.TileLayer(url)
     }
   },
-  methods: {
+  /*methods: {
     update () {
       this.map.setView(this.getCenter, this.zoom, {
         pan: {
@@ -74,19 +60,62 @@ export default {
     },
     lat () { this.update() },
     lng () { this.update() },
+  },*/
+  watch: {
+    MicRegThings (things) {
+
+      // Extract affected things
+      things.forEach(thing => {
+        let pos = thing.pos.split(',')
+        let newPos = new L.latLng(pos[0], pos[1])
+
+        // New thing, add it to the array and map
+        if (!this.marker.hasOwnProperty(thing.id)) {
+          let newMarker = new L.Marker(newPos)
+          newMarker.bindPopup(`
+            <div><b>${thing.id}</b></div>
+            <div>${Math.round(thing.tmp * 100) / 100}°C</div>
+            <div>${Math.round(thing.hum * 100) / 100}%</div>
+            <div>${Math.round(thing.bat * 100) / 100}V</div>
+          `, {closeButton: false})
+          newMarker.on('click', () => { this.$router.push('/dashboard/' + thing.id) })
+          newMarker.addTo(this.map)
+          this.marker[thing.id] = newMarker
+          return
+        }
+
+        let marker = this.marker[thing.id]
+
+        // Thing has a new pos, just move it
+        // TODO: add margin of error (see docs)
+        if (!marker.getLatLng().equals(newPos))
+          marker.setLatLng(newPos)
+
+        // TODO: doesn't work atm
+        // Update popup values
+        marker.unbindPopup()
+        marker.bindPopup(`
+          <div><b>${thing.id}</b></div>
+          <div>${Math.round(thing.tmp * 100) / 100}°C</div>
+          <div>${Math.round(thing.hum * 100) / 100}%</div>
+          <div>${Math.round(thing.bat * 100) / 100}V</div>
+        `, {closeButton: false})
+
+        // TODO: check alert values & change marker icon
+      })
+
+      //let group = new L.featureGroup(this.marker)
+      //this.map.fitBounds(group.getBounds())
+    }
   },
   mounted () {
-    this.layer = new L.TileLayer(this.getLayerUrl)
     this.map = L.map('thing-map', {
       center: this.getCenter,
-      zoom: this.zoom,
-      scrollWheelZoom: true,
-      layers: this.layer,
-      attributionControl: false,
-      zoomControl: false
+      zoom: 13,
+      layers: this.getLayer,
+      attributionControl: false
     })
-    L.control.zoom({position: 'bottomright'}).addTo(this.map)
-    this.marker = new L.Marker(this.getCenter).addTo(this.map)
+    this.map.zoomControl.setPosition('bottomright')
   }
 }
 </script>

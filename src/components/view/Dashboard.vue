@@ -26,6 +26,7 @@ export default {
 
 <style lang="scss">
 #svv-dashboard {
+  height: 100%;
   position: relative;
   z-index: 1;
 }

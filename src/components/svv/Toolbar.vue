@@ -58,7 +58,8 @@ export default {
   right: 0;
 
   .md-toolbar {
-    background-color: rgba(68, 79, 85, 1);
+    background-color: rgba(68, 79, 85, .75);
+    //background-color: rgba(0, 0, 0, .75);
 
     &.scrolled {
       -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);

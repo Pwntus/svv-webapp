@@ -1,10 +1,11 @@
 import AWSMqtt from 'aws-mqtt-client'
+import { MIC_THING_TOPIC } from '@/config'
 import { MIC } from '@/lib/MIC'
 
 class MQTTClass {
   init (ctx) {
     this.ctx = ctx
-    this.topic = 'thing-update/StartIoT/191/#'
+    this.topic = MIC_THING_TOPIC
     this.retries = 0
 
     this.mqtt = new AWSMqtt({
@@ -76,6 +77,7 @@ class MQTTClass {
   message (topic, message) {
     console.log(message.toString('utf-8'))
     this.ctx.eventBus.$emit('mqtt:message', topic, message.toString('utf-8'))
+    this.ctx.$store.dispatch('MIC/update', {topic, message: message.toString('utf-8')})
   }
 
   kill () {

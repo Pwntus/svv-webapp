@@ -15,6 +15,6 @@ export default {
 <style lang="scss">
 #svv-map {
   width: 100%;
-  height: 500px;
+  height: 70%;
 }
 </style>

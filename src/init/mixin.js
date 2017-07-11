@@ -13,7 +13,9 @@ Vue.mixin({
     ...mapGetters({
       AppInited:  'App/inited',
       AppUser:    'App/user',
-      MicThings:  'MIC/things'
+      MicThings:  'MIC/things',
+      MicRegThings:  'MIC/regThings',
+      MicUnregThings:  'MIC/unregThings'
     })
   },
   methods: {

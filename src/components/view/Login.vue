@@ -1,34 +1,36 @@
 <template lang="pug">
 #svv-login
-  svv-card(
-    :loading="loading"
-    :hidden="false"
-  )
-    md-card-header
-      .md-title Login
-      .md-subhead v0.1
+  .outer
+    .middle
+      svv-card(
+        :loading="loading"
+        :hidden="false"
+      )
+        md-card-header
+          .md-title Login
+          .md-subhead v0.1
 
-    md-card-content
-      md-input-container
-        label Username
-        md-input(
-          v-model="username"
-          :disabled="loading"
-          @keyup.enter.native="login"
-        )
-      md-input-container(md-has-password)
-        label Password
-        md-input(
-          type="password"
-          v-model="password"
-          :disabled="loading"
-          @keyup.enter.native="login"
-        )
-    md-card-actions
-      md-button(
-        :disabled="loading"
-        @click.native="login"
-      ) Login
+        md-card-content
+          md-input-container
+            label Username
+            md-input(
+              v-model="username"
+              :disabled="loading"
+              @keyup.enter.native="login"
+            )
+          md-input-container(md-has-password)
+            label Password
+            md-input(
+              type="password"
+              v-model="password"
+              :disabled="loading"
+              @keyup.enter.native="login"
+            )
+        md-card-actions
+          md-button(
+            :disabled="loading"
+            @click.native="login"
+          ) Login
 </template>
 
 <script>
@@ -70,9 +72,22 @@ export default {
 <style lang="scss">
 #svv-login {
 
-  .svv-card {
-    width: 400px;
-    margin: 200px auto 100px;
+  .outer {
+    width: 100%;
+    height: 100%;
+    display: table;
+    position: absolute;
+
+    .middle {
+      padding: 10px;
+      display: table-cell;
+      vertical-align: middle;
+
+      .svv-card {
+        max-width: 350px;
+        margin: 0 auto;
+      }
+    }
   }
 }
 </style>
