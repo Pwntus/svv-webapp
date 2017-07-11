@@ -1,13 +1,13 @@
 <template lang="pug">
 #svv-summary
-  md-card
+  svv-card
     md-card-header
-      .md-title Data from {{ MicRegThings.length }} road sensors
+      .md-title Monitoring {{ MicRegThings.length }} road {{ (MicRegThings.length > 1) ? 'sensors' : 'sensor' }}
       .md-subhead
         md-icon access_time
         span Real Time
     md-card-content
-      | This application is built on top of the <a href="https://startiot.mic.telenorconnexion.com/" target="_new">Managed IoT Cloud</a> enablement platform provided by Telenor Connexion and is running entierly in the web browser!
+      | This application is built on top of the <a href="https://startiot.mic.telenorconnexion.com/" target="_new">Managed IoT Cloud</a> platform provided by Telenor Connexion and is running entierly in the web browser!
       br
       | Click on a thing in the map to explore more about a sensor.
     md-card-actions
@@ -18,8 +18,10 @@
 </template>
 
 <script>
+import SvvCard from '@/components/svv/Card'
 export default {
-  name: 'Summary'
+  name: 'Summary',
+  components: { SvvCard }
 }
 </script>
 

@@ -8,7 +8,7 @@
       md-flex-large="33"
       md-flex-xlarge="33"
     )
-      md-card
+      svv-card
         md-card-content
           md-list
             md-list-item
@@ -49,14 +49,22 @@
       md-flex-large="66"
       md-flex-xlarge="66"
     )
-      md-card
+      svv-card(:loading="loading")
         md-card-header
           .md-subhead Temperature Over Time
 </template>
 
 <script>
+import SvvCard from '@/components/svv/Card'
+
 export default {
   name: 'Verbose',
+  components: { SvvCard },
+  data () {
+    return {
+      loading: true
+    }
+  },
   computed: {
     thing () {
       let tmp = null
@@ -72,6 +80,10 @@ export default {
     bat () { return (this.thing) ? this.thing.bat : null },
     pos () { return (this.thing) ? this.thing.pos : null },
     timestamp () { return (this.thing) ? this.thing.timestamp : null }
+  },
+  mounted () {
+    this.$store.dispatch('MIC/select', this.$route.params.id)
+      .then(() => { this.loading = false })
   }
 }
 </script>

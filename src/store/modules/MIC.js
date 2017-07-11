@@ -4,7 +4,8 @@ import { MIC } from '@/lib/MIC'
 import { MIC_THING_TYPE_ID } from '@/config'
 
 const state = {
-  things: []
+  things: [],
+  selected: null
 }
 
 const mutations = {
@@ -58,6 +59,15 @@ const mutations = {
       return console.log(e)
       return
     }
+  },
+  [t.MIC_SELECT_THING] (state, data) {
+
+    data.hits.hits.forEach(hit => {
+      state.selected
+    })
+  },
+  [t.MIC_DESELECT_THING] (state) {
+    state.selected = null
   }
 }
 
@@ -108,6 +118,42 @@ const actions = {
       console.log(e)
       return
     }
+  },
+  select ({commit}, thingName) {
+    commit(t.MIC_DESELECT_THING)
+    let payload = {
+      action: 'FIND',
+      query: {
+        _source: ['state.bat', 'state.tmp', 'state.hum', 'timestamp'],
+        sort: { timestamp: { order: 'desc' } },
+        filter: {
+          bool: {
+            must: [
+              { terms: { thingName: [thingName] } },
+              { range: { timestamp: {
+                gte: (Date.now() - 1 * 60 * 60 * 1000),
+                lte: Date.now()
+              } } }
+            ],
+            minimum_should_match: 1,
+            should: [
+              { exists: { field: 'state.bat' } },
+              { exists: { field: 'state.tmp' } },
+              { exists: { field: 'state.hum' } }
+            ]
+          }
+        },
+        size: 100
+      }
+    }
+    return new Promise((resolve, reject) => {
+      MIC.invoke('ObservationLambda', payload)
+        .then(data => {
+          commit(t.MIC_SELECT_THING, data)
+          resolve()
+        })
+        .catch(err => { reject(err) })
+    })
   }
 }
 

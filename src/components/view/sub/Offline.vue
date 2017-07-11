@@ -1,6 +1,6 @@
 <template lang="pug">
 #svv-offline
-  md-card
+  svv-card
     md-card-header
       .md-title There are {{ MicUnregThings.length }} inactive sensors
     md-card-content
@@ -13,13 +13,19 @@
           .md-list-text-container
             span ID: {{ thing.id }}
             span Last heard from: {{ reltime(thing.timestamp) }}
+    md-card-actions
+      md-button.md-accent(
+        @click.native="$router.push('/dashboard')"
+      ) Back
 </template>
 
 <script>
+import SvvCard from '@/components/svv/Card'
 import moment from 'moment'
 
 export default {
   name: 'Offline',
+  components: { SvvCard },
   methods: {
     reltime (timestamp) {
       let date = moment(timestamp)
