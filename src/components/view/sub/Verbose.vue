@@ -16,21 +16,27 @@
               .md-list-text-container
                 span {{ Math.round(tmp * 100) / 100 }}°C
                 span Temperature
-              md-button.md-icon-button.md-list-action
+              md-button.md-icon-button.md-list-action(
+                @click.native="selected = 0"
+              )
                 md-icon arrow_forward
             md-list-item
               md-icon blur_on
               .md-list-text-container
                 span {{ Math.round(hum * 100) / 100 }}%
                 span Humidity
-              md-button.md-icon-button.md-list-action
+              md-button.md-icon-button.md-list-action(
+                @click.native="selected = 1"
+              )
                 md-icon arrow_forward
             md-list-item
               md-icon battery_full
               .md-list-text-container
                 span {{ Math.round(bat * 100) / 100 }}V
                 span Battery Voltage
-              md-button.md-icon-button.md-list-action
+              md-button.md-icon-button.md-list-action(
+                @click.native="selected = 2"
+              )
                 md-icon arrow_forward
             md-list-item
               md-icon gps_fixed
@@ -51,18 +57,25 @@
     )
       svv-card(:loading="loading")
         md-card-header
-          .md-subhead Temperature Over Time
+          .md-subhead {{ c3Data[1][0] }}
+        md-card-content
+          svv-c3(:data="c3Data")
 </template>
 
 <script>
 import SvvCard from '@/components/svv/Card'
+import SvvC3 from '@/components/svv/C3'
 
 export default {
   name: 'Verbose',
-  components: { SvvCard },
+  components: {
+    SvvCard,
+    SvvC3
+  },
   data () {
     return {
-      loading: true
+      loading: true,
+      selected: 0
     }
   },
   computed: {
@@ -79,7 +92,18 @@ export default {
     hum () { return (this.thing) ? this.thing.hum : null },
     bat () { return (this.thing) ? this.thing.bat : null },
     pos () { return (this.thing) ? this.thing.pos : null },
-    timestamp () { return (this.thing) ? this.thing.timestamp : null }
+    timestamp () { return (this.thing) ? this.thing.timestamp : null },
+    c3Data () {
+      let tmp = 'tmp'
+      if (this.selected == 0) tmp = 'tmp'
+      if (this.selected == 1) tmp = 'hum'
+      if (this.selected == 2) tmp = 'bat'
+
+      return [
+        this.MicSelected.timestamp,
+        this.MicSelected[tmp]
+      ]
+    }
   },
   mounted () {
     this.$store.dispatch('MIC/select', this.$route.params.id)

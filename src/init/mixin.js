@@ -11,11 +11,12 @@ Vue.mixin({
   },
   computed: {
     ...mapGetters({
-      AppInited:  'App/inited',
-      AppUser:    'App/user',
-      MicThings:  'MIC/things',
-      MicRegThings:  'MIC/regThings',
-      MicUnregThings:  'MIC/unregThings'
+      AppInited:      'App/inited',
+      AppUser:        'App/user',
+      MicThings:      'MIC/things',
+      MicRegThings:   'MIC/regThings',
+      MicUnregThings: 'MIC/unregThings',
+      MicSelected:    'MIC/selected'
     })
   },
   methods: {

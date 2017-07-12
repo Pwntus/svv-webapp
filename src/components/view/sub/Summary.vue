@@ -11,7 +11,7 @@
       br
       | Click on a thing in the map to explore more about a sensor.
     md-card-actions
-      md-button.md-accent(
+      md-button.md-primary(
         href="https://startiot.mic.telenorconnexion.com/"
         target="_new"
       ) Managed IoT Cloud

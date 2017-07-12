@@ -15,9 +15,9 @@ import {
  */
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('@/../node_modules/leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('@/../node_modules/leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('@/../node_modules/leaflet/dist/images/marker-shadow.png')
+  iconRetinaUrl: require('@/assets/marker-icon-2x.png'),
+  iconUrl: require('@/assets/marker-icon.png'),
+  shadowUrl: require('@/assets/marker-shadow.png')
 })
 
 export default {
@@ -37,30 +37,6 @@ export default {
       return new L.TileLayer(url)
     }
   },
-  /*methods: {
-    update () {
-      this.map.setView(this.getCenter, this.zoom, {
-        pan: {
-          animate: true,
-          duration: 2.5
-        },
-        zoom: {
-          animate: true
-        }
-      })
-      this.marker.setLatLng(this.getCenter)
-    } 
-  },
-  watch: {
-    pack () {
-      this.layer.setUrl(this.getLayerUrl)
-    },
-    zoom () {
-      this.map.setView(this.getCenter, this.zoom)
-    },
-    lat () { this.update() },
-    lng () { this.update() },
-  },*/
   watch: {
     MicRegThings (things) {
 

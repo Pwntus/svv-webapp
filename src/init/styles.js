@@ -5,6 +5,7 @@ Vue.use(VueMaterial)
 
 import '@/../node_modules/vue-material/dist/vue-material.css'
 import '@/../node_modules/leaflet/dist/leaflet.css'
+import '@/../node_modules/c3/c3.css'
 import '@/assets/css/global.scss'
 
 Vue.material.registerTheme('default', {

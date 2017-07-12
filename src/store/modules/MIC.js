@@ -5,7 +5,12 @@ import { MIC_THING_TYPE_ID } from '@/config'
 
 const state = {
   things: [],
-  selected: null
+  selected: {
+    timestamp: [],
+    bat: [],
+    hum: [],
+    tmp: []
+  }
 }
 
 const mutations = {
@@ -13,14 +18,14 @@ const mutations = {
     state.things = []
     value.forEach(thing => {
       try {
+        let s = thing._source.state
         state.things.push({
           id: thing._id,
-          createdAt: thing._source.createdAt,
-          bat: (typeof thing._source.state.bat === 'undefined') ? null : thing._source.state.bat,
-          hum: (typeof thing._source.state.hum === 'undefined') ? null : thing._source.state.hum,
-          tmp: (typeof thing._source.state.tmp === 'undefined') ? null : thing._source.state.tmp,
-          pos: (typeof thing._source.state.pos === 'undefined') ? 'None,None' : thing._source.state.pos,
-          timestamp: (typeof thing._source.state.timestamp === 'undefined') ? null : thing._source.state.timestamp
+          bat: (typeof s.bat === 'undefined') ? null : parseFloat(s.bat),
+          hum: (typeof s.hum === 'undefined') ? null : parseFloat(s.hum),
+          tmp: (typeof s.tmp === 'undefined') ? null : parseFloat(s.tmp),
+          pos: (typeof s.pos === 'undefined') ? 'None,None' : s.pos,
+          timestamp: (typeof s.timestamp === 'undefined') ? null : s.timestamp
         })
       } catch (e) {
         return
@@ -35,21 +40,19 @@ const mutations = {
         if (thing.id !== id) return
 
         found = true
-        thing.bat = (typeof reported.bat === 'undefined') ? thing.bat : reported.bat
-        thing.hum = (typeof reported.hum === 'undefined') ? thing.hum : reported.hum
-        thing.tmp = (typeof reported.tmp === 'undefined') ? thing.tmp : reported.tmp
+        thing.bat = (typeof reported.bat === 'undefined') ? thing.bat : parseFloat(reported.bat)
+        thing.hum = (typeof reported.hum === 'undefined') ? thing.hum : parseFloat(reported.hum)
+        thing.tmp = (typeof reported.tmp === 'undefined') ? thing.tmp : parseFloat(reported.tmp)
         thing.pos = (typeof reported.pos === 'undefined') ? thing.pos : reported.pos
         thing.timestamp = (typeof reported.timestamp === 'undefined') ? thing.timestamp : reported.timestamp
       })
 
       if (!found) {
-        console.log('NOT')
         state.things.push({
           id: id,
-          createdAt: null,
-          bat: (typeof reported.bat === 'undefined') ? null : reported.bat,
-          hum: (typeof reported.hum === 'undefined') ? null : reported.hum,
-          tmp: (typeof reported.tmp === 'undefined') ? null : reported.tmp,
+          bat: (typeof reported.bat === 'undefined') ? null : parseFloat(reported.bat),
+          hum: (typeof reported.hum === 'undefined') ? null : parseFloat(reported.hum),
+          tmp: (typeof reported.tmp === 'undefined') ? null : parseFloat(reported.tmp),
           pos: (typeof reported.pos === 'undefined') ? 'None,None' : reported.pos,
           timestamp: (typeof reported.timestamp === 'undefined') ? null : reported.timestamp
         })
@@ -61,13 +64,24 @@ const mutations = {
     }
   },
   [t.MIC_SELECT_THING] (state, data) {
-
     data.hits.hits.forEach(hit => {
-      state.selected
+      state.selected.timestamp.push(hit._source.timestamp)
+      state.selected.bat.push(parseFloat(hit._source.state.bat))
+      state.selected.hum.push(parseFloat(hit._source.state.hum))
+      state.selected.tmp.push(parseFloat(hit._source.state.tmp))
     })
+    state.selected.timestamp.unshift('x')
+    state.selected.bat.unshift('Battery V')
+    state.selected.hum.unshift('Humidity %')
+    state.selected.tmp.unshift('Temperature °C')
   },
   [t.MIC_DESELECT_THING] (state) {
-    state.selected = null
+    state.selected = {
+      timestamp: [],
+      bat: [],
+      hum: [],
+      tmp: []
+    }
   }
 }
 
@@ -131,7 +145,7 @@ const actions = {
             must: [
               { terms: { thingName: [thingName] } },
               { range: { timestamp: {
-                gte: (Date.now() - 1 * 60 * 60 * 1000),
+                gte: (Date.now() - 3 * 24 * 60 * 60 * 1000),
                 lte: Date.now()
               } } }
             ],
@@ -143,7 +157,7 @@ const actions = {
             ]
           }
         },
-        size: 100
+        size: 50
       }
     }
     return new Promise((resolve, reject) => {
@@ -176,6 +190,9 @@ const getters = {
         tmp.push(thing)
     })
     return tmp
+  },
+  selected: (state) => {
+    return state.selected
   }
 }
 

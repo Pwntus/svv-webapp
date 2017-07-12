@@ -69,31 +69,6 @@ const actions = {
     commit(t.APP_SET_USER, null)
     window.localStorage.removeItem('account')
   }
-
-  /*init ({commit, dispatch}) {
-    Vue.http.get(MIC_HOSTNAME)
-      .then(response => {
-        let manifest = response.body
-        commit(t.APP_SET_MANIFEST, manifest)
-        dispatch('initUser')
-      })
-      .catch(err => {
-        console.warn(err)
-      })
-  },
-  initUser ({commit, state}) {
-    Cognito.init(state.manifest)
-    Cognito.getCredentials()
-      .then(() => {
-        return Cognito.getParameters()
-          .then(user => {
-            commit(t.APP_SET_USER, user)
-          })
-      })
-      .catch(err => {
-        commit(t.APP_SET_USER, -1)
-      })
-  }*/
 }
 
 const getters = {

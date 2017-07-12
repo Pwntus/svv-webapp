@@ -35,7 +35,7 @@ class MQTTClass {
       }
     })
     .catch(e => {
-      console.log(e);
+      console.log(e)
     })
   }
 
@@ -75,7 +75,6 @@ class MQTTClass {
   }
 
   message (topic, message) {
-    console.log(message.toString('utf-8'))
     this.ctx.eventBus.$emit('mqtt:message', topic, message.toString('utf-8'))
     this.ctx.$store.dispatch('MIC/update', {topic, message: message.toString('utf-8')})
   }
