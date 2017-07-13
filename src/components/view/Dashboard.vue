@@ -19,7 +19,10 @@ export default {
 
     MQTT.init(this)
     this.$store.dispatch('MIC/init')
-      .catch(() => { this.$router.push('/logout')} )
+      .catch(err => {
+        console.log(err)
+        this.$router.push('/logout')
+      })
   }
 }
 </script>

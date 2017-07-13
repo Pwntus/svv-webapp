@@ -5,35 +5,68 @@ import { MIC_THING_TYPE_ID } from '@/config'
 
 const state = {
   things: [],
-  selected: {
+  observed: null
+  /*{
     id: null,
     timestamp: [],
     bat: [],
     hum: [],
     tmp: []
-  }
+  }*/
 }
 
 const mutations = {
-  [t.MIC_SET_THINGS] (state, value) {
-    state.things = []
-    value.forEach(thing => {
-      try {
-        let s = thing._source.state
-        state.things.push({
-          id: thing._id,
-          bat: (typeof s.bat === 'undefined') ? null : parseFloat(s.bat),
-          hum: (typeof s.hum === 'undefined') ? null : parseFloat(s.hum),
-          tmp: (typeof s.tmp === 'undefined') ? null : parseFloat(s.tmp),
-          pos: (typeof s.pos === 'undefined') ? 'None,None' : s.pos,
-          timestamp: (typeof s.timestamp === 'undefined') ? null : s.timestamp
-        })
-      } catch (e) {
-        return
+
+  [t.MIC_SET_THINGS] (state, hits) {
+    state.things = hits.map(hit => {
+      let s = hit._source.state
+      return {
+        id: hit._id,
+        bat: parseFloat(s.bat),
+        hum: parseFloat(s.hum),
+        tmp: parseFloat(s.tmp),
+        pos: s.pos,
+        timestamp: s.timestamp
       }
-    })
+    }).reduce((a, b) => {
+      a.push(b)
+      return a
+    }, [])
   },
-  [t.MIC_UPDATE_THING] (state, {id, reported}) {
+
+  [t.MIC_SET_OBSERVATION] (state, {thingName, hits}) {
+    state.observed = { id: thingName, bat: [], hum: [], tmp: [], timestamp: [] }
+    hits.map(hit => {
+      let s = hit._source
+      return {
+        bat: parseFloat(s.state.bat),
+        hum: parseFloat(s.state.hum),
+        tmp: parseFloat(s.state.tmp),
+        timestamp: s.timestamp
+      }
+    }).reduce((a, b) => {
+      a.bat.push(b.bat)
+      a.hum.push(b.hum)
+      a.tmp.push(b.tmp)
+      a.timestamp.push(b.timestamp)
+      return a
+    }, state.observed)
+  },
+
+  [t.MIC_UPDATE_THINGS] (state, {thingName, reported}) {
+    let newThing = (typeof state.things.find(thing => thing.id === thingName) === 'undefined')
+
+    reported = {
+      bat: parseFloat(reported.bat),
+      bat: parseFloat(reported.bat),
+      bat: parseFloat(reported.bat)
+    }
+
+    if (newThing) {
+
+    }
+
+
     let found = false
 
     try {
@@ -77,88 +110,48 @@ const mutations = {
     state.selected.bat.push(parseFloat(reported.bat))
     state.selected.hum.push(parseFloat(reported.hum))
     state.selected.tmp.push(parseFloat(reported.tmp))
-  },
-  [t.MIC_SELECT_THING] (state, {thingName, data}) {
-    data.hits.hits.forEach(hit => {
-      state.selected.timestamp.push(hit._source.timestamp)
-      state.selected.bat.push(parseFloat(hit._source.state.bat))
-      state.selected.hum.push(parseFloat(hit._source.state.hum))
-      state.selected.tmp.push(parseFloat(hit._source.state.tmp))
-    })
-    state.selected.timestamp.unshift('x')
-    state.selected.bat.unshift('Battery V')
-    state.selected.hum.unshift('Humidity %')
-    state.selected.tmp.unshift('Temperature °C')
-    state.selected.id = thingName
-  },
-  [t.MIC_DESELECT_THING] (state) {
-    state.selected = {
-      id: null,
-      timestamp: [],
-      bat: [],
-      hum: [],
-      tmp: []
-    }
   }
 }
 
 const actions = {
+
+  /* Init is called when the app is loaded and
+   * finds all devices belonging to the thing type.
+   * TODO: find latest `pos` value of a thing that is NOT 'None,None'
+   */
   init ({commit, dispatch}) {
     let payload = {
       action: 'FIND',
       query: {
         size: 10,
         from: 0,
-        sort: {
-          'label.lowercase': 'asc'
-        },
+        sort: { 'label.lowercase': 'asc' },
         filter: {
           bool: {
             must: [{
-              term: {
-                thingType: MIC_THING_TYPE_ID
-              }
+              term: { thingType: MIC_THING_TYPE_ID }
             }]
-          }
-        }
-      }
-    }
-    return new Promise((resolve, reject) => {
-      MIC.invoke('ThingLambda', payload)
-        .then(data => {
-          let hits = null
-          try {
-            hits = data.hits.hits
-          } catch (e) {
-            reject(e.message)
-          }
-          commit(t.MIC_SET_THINGS, hits)
+    } } } }
 
-          resolve()
-        })
-        .catch(err => { reject(err) })
-    })
+    return MIC.invoke('ThingLambda', payload)
+      .then(data => { return data.hits.hits })
+      .then(hits => {
+        commit(t.MIC_SET_THINGS, hits)
+        return Promise.resolve()
+      })
+      .catch(err => { return Promise.reject(err) })
   },
-  update ({commit, state}, {topic, message}) {
-    try {
-      let tmp = topic.split('/')
-      let thing = tmp[tmp.length - 1]
-      let payload = JSON.parse(message)
-      commit(t.MIC_UPDATE_THING, {id: thing, reported: payload.state.reported})
 
-      // Only update selected data (graph) if MQTT message was selected
-      if (state.selected.id == thing)
-        commit(t.MIC_UPDATE_SELECTED, payload.state.reported)
-    } catch (e) {
-      console.log(e)
-      return
-    }
-  },
-  select ({commit}, thingName) {
-    commit(t.MIC_DESELECT_THING)
+  /* Observe will execute an ES DSL query for a specific thing.
+   * The results are stored in a special `observed` state
+   * with the latest results. MQTT will append this state to
+   * dynamically update any graphs.
+   */
+  observe ({commit}, thingName) {
     let payload = {
       action: 'FIND',
       query: {
+        size: 1000,
         _source: ['state.bat', 'state.tmp', 'state.hum', 'timestamp'],
         sort: { timestamp: { order: 'desc' } },
         filter: {
@@ -176,20 +169,30 @@ const actions = {
               { exists: { field: 'state.tmp' } },
               { exists: { field: 'state.hum' } }
             ]
-          }
-        },
-        size: 1000
-      }
+          } } } }
+
+    return MIC.invoke('ObservationLambda', payload)
+      .then(data => { return data.hits.hits })
+      .then(hits => {
+        commit(t.MIC_SET_OBSERVATION, {thingName, hits})
+        return Promise.resolve()
+      })
+      .catch(err => { return Promise.reject(err) })
+  },
+
+  update ({commit, state}, {topic, message}) {
+    try {
+      let thingName = topic.split('/').pop()
+      let reported = JSON.parse(message).state.reported
+      commit(t.MIC_UPDATE_THINGS, {thingName, reported})
+
+      if (state.selected.id == thingName)
+        commit(t.MIC_UPDATE_OBSERVATION, reported)
+    } catch (e) {
+      console.log(e)
+      return
     }
-    return new Promise((resolve, reject) => {
-      MIC.invoke('ObservationLambda', payload)
-        .then(data => {
-          commit(t.MIC_SELECT_THING, {thingName, data})
-          resolve()
-        })
-        .catch(err => { reject(err) })
-    })
-  }
+  },
 }
 
 const getters = {
@@ -197,23 +200,21 @@ const getters = {
     return state.things
   },
   regThings: (state) => {
-    let tmp = []
-    state.things.forEach(thing => {
-      if (thing.pos !== 'None,None')
-        tmp.push(thing)
-    })
-    return tmp
+    return state.things.reduce((a, b) => {
+      if (b.pos !== 'None,None')
+        a.push(b)
+      return a
+    }, [])
   },
   unregThings: (state) => {
-    let tmp = []
-    state.things.forEach(thing => {
-      if (thing.pos == 'None,None')
-        tmp.push(thing)
-    })
-    return tmp
+    return state.things.reduce((a, b) => {
+      if (b.pos == 'None,None')
+        a.push(b)
+      return a
+    }, [])
   },
-  selected: (state) => {
-    return state.selected
+  observed: (state) => {
+    return state.observed
   }
 }
 

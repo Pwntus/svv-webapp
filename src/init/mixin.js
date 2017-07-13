@@ -16,7 +16,7 @@ Vue.mixin({
       MicThings:      'MIC/things',
       MicRegThings:   'MIC/regThings',
       MicUnregThings: 'MIC/unregThings',
-      MicSelected:    'MIC/selected'
+      MicObserved:    'MIC/observed'
     })
   },
   methods: {

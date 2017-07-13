@@ -62,9 +62,9 @@
     )
       svv-card(:loading="loading")
         md-card-header
-          .md-subhead {{ c3Data[1][0] }}
+          //.md-subhead {{ c3Data[1][0] }}
         md-card-content
-          svv-c3(:data="c3Data")
+          //svv-c3(:data="c3Data")
 </template>
 
 <script>
@@ -99,7 +99,7 @@ export default {
     bat () { return (this.thing) ? this.thing.bat : null },
     pos () { return (this.thing) ? this.thing.pos : null },
     timestamp () { return (this.thing) ? moment(this.thing.timestamp).fromNow() : null },
-    c3Data () {
+    /*c3Data () {
       let tmp = 'tmp'
       if (this.selected == 0) tmp = 'tmp'
       if (this.selected == 1) tmp = 'hum'
@@ -109,7 +109,7 @@ export default {
         this.MicSelected.timestamp,
         this.MicSelected[tmp]
       ]
-    }
+    }*/
   },
   watch: {
     '$route': 'observe'
@@ -120,7 +120,7 @@ export default {
   methods: {
     observe () {
       this.loading = true
-      this.$store.dispatch('MIC/select', this.$route.params.id)
+      this.$store.dispatch('MIC/observe', this.$route.params.id)
         .then(() => { this.loading = false })
     }
   }
