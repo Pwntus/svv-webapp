@@ -6,6 +6,7 @@ import { MIC_THING_TYPE_ID } from '@/config'
 const state = {
   things: [],
   selected: {
+    id: null,
     timestamp: [],
     bat: [],
     hum: [],
@@ -63,7 +64,21 @@ const mutations = {
       return
     }
   },
-  [t.MIC_SELECT_THING] (state, data) {
+  [t.MIC_UPDATE_SELECTED] (state, reported) {
+    // Add graph targets (cuz arrays are empty)
+    if (state.selected.timestamp.length == 0) {
+      state.selected.timestamp.unshift('x')
+      state.selected.bat.unshift('Battery V')
+      state.selected.hum.unshift('Humidity %')
+      state.selected.tmp.unshift('Temperature °C')
+    }
+
+    state.selected.timestamp.push(reported.timestamp)
+    state.selected.bat.push(parseFloat(reported.bat))
+    state.selected.hum.push(parseFloat(reported.hum))
+    state.selected.tmp.push(parseFloat(reported.tmp))
+  },
+  [t.MIC_SELECT_THING] (state, {thingName, data}) {
     data.hits.hits.forEach(hit => {
       state.selected.timestamp.push(hit._source.timestamp)
       state.selected.bat.push(parseFloat(hit._source.state.bat))
@@ -74,9 +89,11 @@ const mutations = {
     state.selected.bat.unshift('Battery V')
     state.selected.hum.unshift('Humidity %')
     state.selected.tmp.unshift('Temperature °C')
+    state.selected.id = thingName
   },
   [t.MIC_DESELECT_THING] (state) {
     state.selected = {
+      id: null,
       timestamp: [],
       bat: [],
       hum: [],
@@ -122,12 +139,16 @@ const actions = {
         .catch(err => { reject(err) })
     })
   },
-  update ({commit}, {topic, message}) {
+  update ({commit, state}, {topic, message}) {
     try {
       let tmp = topic.split('/')
       let thing = tmp[tmp.length - 1]
       let payload = JSON.parse(message)
       commit(t.MIC_UPDATE_THING, {id: thing, reported: payload.state.reported})
+
+      // Only update selected data (graph) if MQTT message was selected
+      if (state.selected.id == thing)
+        commit(t.MIC_UPDATE_SELECTED, payload.state.reported)
     } catch (e) {
       console.log(e)
       return
@@ -145,7 +166,7 @@ const actions = {
             must: [
               { terms: { thingName: [thingName] } },
               { range: { timestamp: {
-                gte: (Date.now() - 3 * 24 * 60 * 60 * 1000),
+                gte: (Date.now() - 5.751 * 24 * 60 * 60 * 1000),
                 lte: Date.now()
               } } }
             ],
@@ -157,13 +178,13 @@ const actions = {
             ]
           }
         },
-        size: 50
+        size: 1000
       }
     }
     return new Promise((resolve, reject) => {
       MIC.invoke('ObservationLambda', payload)
         .then(data => {
-          commit(t.MIC_SELECT_THING, data)
+          commit(t.MIC_SELECT_THING, {thingName, data})
           resolve()
         })
         .catch(err => { reject(err) })

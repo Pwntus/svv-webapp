@@ -19,16 +19,16 @@
               md-button.md-icon-button.md-list-action(
                 @click.native="selected = 0"
               )
-                md-icon arrow_forward
+                md-icon(:class="{ 'md-primary' : selected == 0 }") arrow_forward
             md-list-item
-              md-icon blur_on
+              md-icon grain
               .md-list-text-container
                 span {{ Math.round(hum * 100) / 100 }}%
                 span Humidity
               md-button.md-icon-button.md-list-action(
                 @click.native="selected = 1"
               )
-                md-icon arrow_forward
+                md-icon(:class="{ 'md-primary' : selected == 1 }") arrow_forward
             md-list-item
               md-icon battery_full
               .md-list-text-container
@@ -37,14 +37,19 @@
               md-button.md-icon-button.md-list-action(
                 @click.native="selected = 2"
               )
-                md-icon arrow_forward
+                md-icon(:class="{ 'md-primary' : selected == 2 }") arrow_forward
             md-list-item
               md-icon gps_fixed
               .md-list-text-container
                 span {{ pos }}
                 span GPS Position
             md-list-item
-              md-icon router
+              md-icon timelapse
+              .md-list-text-container
+                span {{ timestamp }}
+                span Reported
+            md-list-item
+              md-icon sim_card
               .md-list-text-container
                 span {{ id }}
                 span Device ID
@@ -65,6 +70,7 @@
 <script>
 import SvvCard from '@/components/svv/Card'
 import SvvC3 from '@/components/svv/C3'
+import moment from 'moment'
 
 export default {
   name: 'Verbose',
@@ -92,7 +98,7 @@ export default {
     hum () { return (this.thing) ? this.thing.hum : null },
     bat () { return (this.thing) ? this.thing.bat : null },
     pos () { return (this.thing) ? this.thing.pos : null },
-    timestamp () { return (this.thing) ? this.thing.timestamp : null },
+    timestamp () { return (this.thing) ? moment(this.thing.timestamp).fromNow() : null },
     c3Data () {
       let tmp = 'tmp'
       if (this.selected == 0) tmp = 'tmp'
@@ -105,9 +111,18 @@ export default {
       ]
     }
   },
-  mounted () {
-    this.$store.dispatch('MIC/select', this.$route.params.id)
-      .then(() => { this.loading = false })
+  watch: {
+    '$route': 'observe'
+  },
+  created () {
+    this.observe()
+  },
+  methods: {
+    observe () {
+      this.loading = true
+      this.$store.dispatch('MIC/select', this.$route.params.id)
+        .then(() => { this.loading = false })
+    }
   }
 }
 </script>

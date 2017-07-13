@@ -106,6 +106,8 @@ export default {
     height: 100%;
 
     a {
+      color: rgba(68, 79, 85, 1) !important;
+      
       &:hover {
         text-decoration: none;
       }

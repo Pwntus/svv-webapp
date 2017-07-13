@@ -9,12 +9,12 @@
           v-for="(thing, index) in MicUnregThings"
           :key="index"
         )
-          md-icon portable_wifi_off
+          md-icon signal_wifi_off
           .md-list-text-container
             span ID: {{ thing.id }}
             span Last heard from: {{ reltime(thing.timestamp) }}
     md-card-actions
-      md-button.md-accent(
+      md-button.md-primary(
         @click.native="$router.push('/dashboard')"
       ) Back
 </template>

@@ -17,7 +17,7 @@
       v-if="AppUser"
       @click.native="$router.push('/dashboard/offline')"
     )
-      md-icon portable_wifi_off
+      md-icon signal_wifi_off
       md-tooltip(md-direction="bottom") Inactive Sensors
     md-button.md-icon-button.md-primary(
       v-if="AppUser"

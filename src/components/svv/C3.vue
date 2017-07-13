@@ -36,12 +36,6 @@ export default {
         x: 'x',
         columns: []
       },
-      color: {
-        pattern: ['#ff9800']
-      },
-      legend: {
-        show: false
-      },
       axis: {
         x: {
           type: 'timeseries',
@@ -51,13 +45,19 @@ export default {
             }
           }
         }
-      }
+      },
+      color: { pattern: ['#ff9800'] },
+      legend: { show: false },
+      point: { show: false }
     })
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .svv-c3 {
+  .c3 path, .c3 line {
+    stroke: #ff9800;
+  }
 }
 </style>
