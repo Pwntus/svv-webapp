@@ -33,6 +33,20 @@ const mutations = {
     }, [])
   },
 
+  [t.MIC_SET_THINGS_POS] (state, hits) {
+    let positions = {}
+    hits.forEach(hit => {
+      console.log(hit._source.thingName)
+      positions[hit._source.thingName] = hit._source.state.pos
+    })
+
+    state.things.forEach(thing => {
+      if (typeof positions[thing.id] === 'undefined')
+        return
+      thing.pos = positions[thing.id]
+    })
+  },
+
   [t.MIC_SET_OBSERVATION] (state, {thingName, hits}) {
     state.observed = { id: thingName, bat: [], hum: [], tmp: [], timestamp: [] }
     hits.map(hit => {
@@ -60,7 +74,7 @@ const mutations = {
       bat: parseFloat(reported.bat),
       hum: parseFloat(reported.hum),
       tmp: parseFloat(reported.tmp),
-      pos: reported.pos,
+      pos: (reported.pos == 'None,None') ? subjectedThing.pos : reported.pos,
       timestamp: reported.timestamp
     }
 
@@ -104,6 +118,43 @@ const actions = {
       .then(data => { return data.hits.hits })
       .then(hits => {
         commit(t.MIC_SET_THINGS, hits)
+        return dispatch('initPos')
+      })
+      .catch(err => { return Promise.reject(err) })
+  },
+
+  initPos ({commit, state}) {
+    let thingNames = state.things.reduce((a, b) => {
+      a.push(b.id)
+      return a
+    }, [])
+
+    let payload = {
+      action: 'FIND',
+      query: {
+        size: 1000,
+        _source: ['state.pos', 'timestamp', 'thingName'],
+        sort: { timestamp: { order: 'desc' } },
+        filter: {
+          bool: {
+            must: [
+              { terms: { thingName: thingNames } },
+              { range: { timestamp: {
+                gte: (Date.now() - 7 * 24 * 60 * 60 * 1000),
+                lte: Date.now()
+              } } },
+              { exists: { field: 'state.pos' } }
+            ],
+            must_not: [
+              { match: { 'state.pos': 'None,None' } }
+            ],
+            minimum_should_match: 1
+          } } } }
+
+    return MIC.invoke('ObservationLambda', payload)
+      .then(data => { return data.hits.hits })
+      .then(hits => {
+        commit(t.MIC_SET_THINGS_POS, hits)
         return Promise.resolve()
       })
       .catch(err => { return Promise.reject(err) })
