@@ -5,14 +5,13 @@ import { MIC_THING_TYPE_ID } from '@/config'
 
 const state = {
   things: [],
-  observed: null
-  /*{
+  observed: {
     id: null,
     timestamp: [],
     bat: [],
     hum: [],
     tmp: []
-  }*/
+  }
 }
 
 const mutations = {
@@ -54,62 +53,30 @@ const mutations = {
   },
 
   [t.MIC_UPDATE_THINGS] (state, {thingName, reported}) {
-    let newThing = (typeof state.things.find(thing => thing.id === thingName) === 'undefined')
+    let subjectedThing = state.things.find(thing => thing.id === thingName)
 
     reported = {
+      id: thingName,
       bat: parseFloat(reported.bat),
-      bat: parseFloat(reported.bat),
-      bat: parseFloat(reported.bat)
+      hum: parseFloat(reported.hum),
+      tmp: parseFloat(reported.tmp),
+      pos: reported.pos,
+      timestamp: reported.timestamp
     }
 
-    if (newThing) {
-
-    }
-
-
-    let found = false
-
-    try {
-      state.things.forEach(thing => {
-        if (thing.id !== id) return
-
-        found = true
-        thing.bat = (typeof reported.bat === 'undefined') ? thing.bat : parseFloat(reported.bat)
-        thing.hum = (typeof reported.hum === 'undefined') ? thing.hum : parseFloat(reported.hum)
-        thing.tmp = (typeof reported.tmp === 'undefined') ? thing.tmp : parseFloat(reported.tmp)
-        thing.pos = (typeof reported.pos === 'undefined') ? thing.pos : reported.pos
-        thing.timestamp = (typeof reported.timestamp === 'undefined') ? thing.timestamp : reported.timestamp
-      })
-
-      if (!found) {
-        state.things.push({
-          id: id,
-          bat: (typeof reported.bat === 'undefined') ? null : parseFloat(reported.bat),
-          hum: (typeof reported.hum === 'undefined') ? null : parseFloat(reported.hum),
-          tmp: (typeof reported.tmp === 'undefined') ? null : parseFloat(reported.tmp),
-          pos: (typeof reported.pos === 'undefined') ? 'None,None' : reported.pos,
-          timestamp: (typeof reported.timestamp === 'undefined') ? null : reported.timestamp
-        })
-      }
-
-    } catch (e) {
-      return console.log(e)
+    if (typeof subjectedThing === 'undefined') {
+      state.things.push(reported)
       return
     }
-  },
-  [t.MIC_UPDATE_SELECTED] (state, reported) {
-    // Add graph targets (cuz arrays are empty)
-    if (state.selected.timestamp.length == 0) {
-      state.selected.timestamp.unshift('x')
-      state.selected.bat.unshift('Battery V')
-      state.selected.hum.unshift('Humidity %')
-      state.selected.tmp.unshift('Temperature °C')
-    }
 
-    state.selected.timestamp.push(reported.timestamp)
-    state.selected.bat.push(parseFloat(reported.bat))
-    state.selected.hum.push(parseFloat(reported.hum))
-    state.selected.tmp.push(parseFloat(reported.tmp))
+    subjectedThing = reported
+  },
+
+  [t.MIC_UPDATE_OBSERVATION] (state, reported) {
+    state.observed.timestamp.push(reported.timestamp)
+    state.observed.bat.push(parseFloat(reported.bat))
+    state.observed.hum.push(parseFloat(reported.hum))
+    state.observed.tmp.push(parseFloat(reported.tmp))
   }
 }
 
@@ -151,7 +118,7 @@ const actions = {
     let payload = {
       action: 'FIND',
       query: {
-        size: 1000,
+        size: 100,
         _source: ['state.bat', 'state.tmp', 'state.hum', 'timestamp'],
         sort: { timestamp: { order: 'desc' } },
         filter: {
@@ -159,7 +126,7 @@ const actions = {
             must: [
               { terms: { thingName: [thingName] } },
               { range: { timestamp: {
-                gte: (Date.now() - 5.751 * 24 * 60 * 60 * 1000),
+                gte: (Date.now() - 1 * 24 * 60 * 60 * 1000),
                 lte: Date.now()
               } } }
             ],
@@ -186,7 +153,7 @@ const actions = {
       let reported = JSON.parse(message).state.reported
       commit(t.MIC_UPDATE_THINGS, {thingName, reported})
 
-      if (state.selected.id == thingName)
+      if (state.observed.id == thingName)
         commit(t.MIC_UPDATE_OBSERVATION, reported)
     } catch (e) {
       console.log(e)

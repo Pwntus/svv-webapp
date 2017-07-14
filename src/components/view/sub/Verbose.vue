@@ -62,9 +62,9 @@
     )
       svv-card(:loading="loading")
         md-card-header
-          //.md-subhead {{ c3Data[1][0] }}
+          .md-subhead {{ c3Data[1][0] }}
         md-card-content
-          //svv-c3(:data="c3Data")
+          svv-c3(:data="c3Data")
 </template>
 
 <script>
@@ -99,17 +99,15 @@ export default {
     bat () { return (this.thing) ? this.thing.bat : null },
     pos () { return (this.thing) ? this.thing.pos : null },
     timestamp () { return (this.thing) ? moment(this.thing.timestamp).fromNow() : null },
-    /*c3Data () {
-      let tmp = 'tmp'
-      if (this.selected == 0) tmp = 'tmp'
-      if (this.selected == 1) tmp = 'hum'
-      if (this.selected == 2) tmp = 'bat'
+    c3Data () {
+      let label = ['Temperature °C', 'Humidity %', 'Battery V']
+      let type = ['tmp', 'hum', 'bat']
 
       return [
-        this.MicSelected.timestamp,
-        this.MicSelected[tmp]
+        ['x', ...this.MicObserved.timestamp],
+        [label[this.selected], ...this.MicObserved[type[this.selected]]]
       ]
-    }*/
+    }
   },
   watch: {
     '$route': 'observe'
