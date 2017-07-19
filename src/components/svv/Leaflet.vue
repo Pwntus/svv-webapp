@@ -25,7 +25,7 @@ export default {
   data () {
     return {
       map: null,
-      marker: []
+      marker: {}
     }
   },
   computed: {
@@ -40,6 +40,7 @@ export default {
   watch: {
     MicRegThings (things) {
 
+      console.log(this.marker)
       // Extract affected things
       things.forEach(thing => {
         let pos = thing.pos.split(',')
@@ -64,8 +65,10 @@ export default {
 
         // Thing has a new pos, just move it
         // TODO: add margin of error (see docs)
-        if (!marker.getLatLng().equals(newPos))
+        if (!marker.getLatLng().equals(newPos)) {
           marker.setLatLng(newPos)
+          console.log('MOVE')
+        }
 
         // TODO: doesn't work atm
         // Update popup values

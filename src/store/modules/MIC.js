@@ -84,6 +84,10 @@ const mutations = {
     }
 
     subjectedThing = reported
+
+    let copy = state.things.slice()
+    state.things = copy
+    console.log(state.things)
   },
 
   [t.MIC_UPDATE_OBSERVATION] (state, reported) {
@@ -132,7 +136,7 @@ const actions = {
     let payload = {
       action: 'FIND',
       query: {
-        size: 1000,
+        size: thingNames.length,
         _source: ['state.pos', 'timestamp', 'thingName'],
         sort: { timestamp: { order: 'desc' } },
         filter: {
@@ -169,7 +173,7 @@ const actions = {
     let payload = {
       action: 'FIND',
       query: {
-        size: 100,
+        size: 1000,
         _source: ['state.bat', 'state.tmp', 'state.hum', 'timestamp'],
         sort: { timestamp: { order: 'desc' } },
         filter: {
@@ -177,7 +181,7 @@ const actions = {
             must: [
               { terms: { thingName: [thingName] } },
               { range: { timestamp: {
-                gte: (Date.now() - 1 * 24 * 60 * 60 * 1000),
+                gte: (Date.now() - 14 * 24 * 60 * 60 * 1000),
                 lte: Date.now()
               } } }
             ],

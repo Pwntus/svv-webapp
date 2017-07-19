@@ -42,7 +42,7 @@
               md-icon gps_fixed
               .md-list-text-container
                 span {{ pos }}
-                span GPS Position
+                span Last GPS Position
             md-list-item
               md-icon timelapse
               .md-list-text-container
