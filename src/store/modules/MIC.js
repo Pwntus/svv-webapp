@@ -85,9 +85,9 @@ const mutations = {
 
     subjectedThing = reported
 
+    // Copy for reactivity
     let copy = state.things.slice()
     state.things = copy
-    console.log(state.things)
   },
 
   [t.MIC_UPDATE_OBSERVATION] (state, reported) {

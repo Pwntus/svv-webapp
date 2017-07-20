@@ -65,9 +65,9 @@ export default {
 
         // Thing has a new pos, just move it
         // TODO: add margin of error (see docs)
+        // ISSUE: reactivity; doesn't fire watch event
         if (!marker.getLatLng().equals(newPos)) {
           marker.setLatLng(newPos)
-          console.log('MOVE')
         }
 
         // TODO: doesn't work atm
