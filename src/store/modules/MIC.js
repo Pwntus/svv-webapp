@@ -36,14 +36,13 @@ const mutations = {
   [t.MIC_SET_THINGS_POS] (state, hits) {
     let positions = {}
     hits.forEach(hit => {
-      console.log(hit._source.thingName)
       positions[hit._source.thingName] = hit._source.state.pos
     })
 
     state.things.forEach(thing => {
       if (typeof positions[thing.id] === 'undefined')
         return
-      thing.pos = positions[thing.id]
+      thing.pos = (positions[thing.id] !== 'None,None') ? positions[thing.id] : thing.pos
     })
   },
 
@@ -84,10 +83,6 @@ const mutations = {
     }
 
     subjectedThing = reported
-
-    // Copy for reactivity
-    let copy = state.things.slice()
-    state.things = copy
   },
 
   [t.MIC_UPDATE_OBSERVATION] (state, reported) {
@@ -133,35 +128,37 @@ const actions = {
       return a
     }, [])
 
-    let payload = {
-      action: 'FIND',
-      query: {
-        size: thingNames.length,
-        _source: ['state.pos', 'timestamp', 'thingName'],
-        sort: { timestamp: { order: 'desc' } },
-        filter: {
-          bool: {
-            must: [
-              { terms: { thingName: thingNames } },
-              { range: { timestamp: {
-                gte: (Date.now() - 7 * 24 * 60 * 60 * 1000),
-                lte: Date.now()
-              } } },
-              { exists: { field: 'state.pos' } }
-            ],
-            must_not: [
-              { match: { 'state.pos': 'None,None' } }
-            ],
-            minimum_should_match: 1
-          } } } }
+    thingNames.forEach(thingName => {
+      let payload = {
+        action: 'FIND',
+        query: {
+          size: 1,
+          _source: ['state.pos', 'timestamp', 'thingName'],
+          sort: { timestamp: { order: 'desc' } },
+          filter: {
+            bool: {
+              must: [
+                { terms: { thingName: [thingName] } },
+                { range: { timestamp: {
+                  gte: (Date.now() - 360 * 24 * 60 * 60 * 1000),
+                  lte: Date.now()
+                } } },
+                { exists: { field: 'state.pos' } }
+              ],
+              must_not: [
+                { match: { 'state.pos': 'None,None' } }
+              ],
+              minimum_should_match: 1
+            } } } }
 
-    return MIC.invoke('ObservationLambda', payload)
-      .then(data => { return data.hits.hits })
-      .then(hits => {
-        commit(t.MIC_SET_THINGS_POS, hits)
-        return Promise.resolve()
-      })
-      .catch(err => { return Promise.reject(err) })
+      return MIC.invoke('ObservationLambda', payload)
+        .then(data => { return data.hits.hits })
+        .then(hits => {
+          commit(t.MIC_SET_THINGS_POS, hits)
+          return Promise.resolve()
+        })
+        .catch(err => { return Promise.reject(err) })
+    })
   },
 
   /* Observe will execute an ES DSL query for a specific thing.
@@ -222,15 +219,19 @@ const getters = {
     return state.things
   },
   regThings: (state) => {
+    let inactive = + new Date() - 3 * 60 * 60 * 1000
+
     return state.things.reduce((a, b) => {
-      if (b.pos !== 'None,None')
+      if (b.pos !== 'None,None' && b.timestamp > inactive)
         a.push(b)
       return a
     }, [])
   },
   unregThings: (state) => {
+    let inactive = + new Date() - 3 * 60 * 60 * 1000
+
     return state.things.reduce((a, b) => {
-      if (b.pos == 'None,None')
+      if (b.pos == 'None,None' || b.timestamp <= inactive)
         a.push(b)
       return a
     }, [])

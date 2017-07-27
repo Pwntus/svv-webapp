@@ -40,11 +40,13 @@ export default {
   watch: {
     MicRegThings (things) {
 
-      console.log(this.marker)
+      console.log(things)
+
       // Extract affected things
       things.forEach(thing => {
         let pos = thing.pos.split(',')
         let newPos = new L.latLng(pos[0], pos[1])
+
 
         // New thing, add it to the array and map
         if (!this.marker.hasOwnProperty(thing.id)) {
