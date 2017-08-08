@@ -40,13 +40,10 @@ export default {
   watch: {
     MicRegThings (things) {
 
-      console.log(things)
-
       // Extract affected things
       things.forEach(thing => {
         let pos = thing.pos.split(',')
         let newPos = new L.latLng(pos[0], pos[1])
-
 
         // New thing, add it to the array and map
         if (!this.marker.hasOwnProperty(thing.id)) {
@@ -67,20 +64,17 @@ export default {
 
         // Thing has a new pos, just move it
         // TODO: add margin of error (see docs)
-        // ISSUE: reactivity; doesn't fire watch event
         if (!marker.getLatLng().equals(newPos)) {
           marker.setLatLng(newPos)
         }
 
-        // TODO: doesn't work atm
         // Update popup values
-        marker.unbindPopup()
-        marker.bindPopup(`
+        marker._popup.setContent(`
           <div><b>${thing.id}</b></div>
           <div>${Math.round(thing.tmp * 100) / 100}°C</div>
           <div>${Math.round(thing.hum * 100) / 100}%</div>
           <div>${Math.round(thing.bat * 100) / 100}V</div>
-        `, {closeButton: false})
+        `)
 
         // TODO: check alert values & change marker icon
       })

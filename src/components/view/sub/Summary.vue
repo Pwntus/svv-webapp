@@ -36,6 +36,7 @@
             md-list-item(
               v-for="(thing, index) in MicRegThings"
               :key="index"
+              @click="$router.push('/dashboard/'+ thing.id)"
             )
               md-icon.green wifi
               .md-list-text-container

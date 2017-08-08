@@ -44,6 +44,13 @@ export default {
               return moment(x).format('D MMM, HH:mm')
             }
           }
+        },
+        y: {
+          tick: {
+            format: (x) => {
+              return parseFloat(x).toFixed(1)
+            }
+          }
         }
       },
       color: { pattern: ['#ff9800'] },

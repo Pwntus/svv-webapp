@@ -66,8 +66,6 @@ const mutations = {
   },
 
   [t.MIC_UPDATE_THINGS] (state, {thingName, reported}) {
-    let subjectedThing = state.things.find(thing => thing.id === thingName)
-
     reported = {
       id: thingName,
       bat: parseFloat(reported.bat),
@@ -77,12 +75,18 @@ const mutations = {
       timestamp: reported.timestamp
     }
 
-    if (typeof subjectedThing === 'undefined') {
-      state.things.push(reported)
-      return
+    // Find subject
+    for (let i in state.things) {
+      if (state.things[i].id == thingName) {
+        state.things[i] = reported
+        let copy = state.things.slice(0)
+        state.things = copy
+        return
+      }
     }
 
-    subjectedThing = reported
+    // Unknown subject, add it
+    state.things.push(reported)
   },
 
   [t.MIC_UPDATE_OBSERVATION] (state, reported) {
@@ -178,7 +182,7 @@ const actions = {
             must: [
               { terms: { thingName: [thingName] } },
               { range: { timestamp: {
-                gte: (Date.now() - 14 * 24 * 60 * 60 * 1000),
+                gte: (Date.now() - 2 * 24 * 60 * 60 * 1000),
                 lte: Date.now()
               } } }
             ],
@@ -202,6 +206,11 @@ const actions = {
   update ({commit, state}, {topic, message}) {
     try {
       let thingName = topic.split('/').pop()
+
+      // Hack, filter out undesired things
+      if (thingName !== '00000618' && thingName !== '00000625')
+        return
+
       let reported = JSON.parse(message).state.reported
       commit(t.MIC_UPDATE_THINGS, {thingName, reported})
 
