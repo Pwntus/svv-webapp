@@ -66,19 +66,19 @@ const mutations = {
   },
 
   [t.MIC_UPDATE_THINGS] (state, {thingName, reported}) {
-    reported = {
-      id: thingName,
-      bat: parseFloat(reported.bat),
-      hum: parseFloat(reported.hum),
-      tmp: parseFloat(reported.tmp),
-      pos: (reported.pos == 'None,None') ? subjectedThing.pos : reported.pos,
-      timestamp: reported.timestamp
-    }
+    
 
     // Find subject
     for (let i in state.things) {
       if (state.things[i].id == thingName) {
-        state.things[i] = reported
+        state.things[i] = {
+          id: thingName,
+          bat: parseFloat(reported.bat),
+          hum: parseFloat(reported.hum),
+          tmp: parseFloat(reported.tmp),
+          pos: (reported.pos == 'None,None') ? state.things[i].pos : reported.pos,
+          timestamp: reported.timestamp
+        }
         let copy = state.things.slice(0)
         state.things = copy
         return
@@ -86,7 +86,14 @@ const mutations = {
     }
 
     // Unknown subject, add it
-    state.things.push(reported)
+    state.things.push({
+      id: thingName,
+      bat: parseFloat(reported.bat),
+      hum: parseFloat(reported.hum),
+      tmp: parseFloat(reported.tmp),
+      pos: reported.pos,
+      timestamp: reported.timestamp
+    })
   },
 
   [t.MIC_UPDATE_OBSERVATION] (state, reported) {
