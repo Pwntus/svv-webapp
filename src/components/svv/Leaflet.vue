@@ -30,7 +30,7 @@ export default {
   },
   computed: {
     getCenter () {
-      return new L.LatLng(69.681580, 18.977034)
+      return new L.LatLng(66.353766, 14.415691)
     },
     getLayer () {
       let url = `https://api.mapbox.com/styles/v1/mapbox/${LEAFLET_PACK}/tiles/256/{z}/{x}/{y}?access_token=${LEAFLET_API_KEY}`
@@ -86,11 +86,17 @@ export default {
   mounted () {
     this.map = L.map('thing-map', {
       center: this.getCenter,
-      zoom: 13,
+      zoom: 5,
       layers: this.getLayer,
       attributionControl: false
     })
     this.map.zoomControl.setPosition('bottomright')
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        this.map.flyTo(new L.LatLng(pos.coords.latitude, pos.coords.longitude), 11, { duration: 1.5 })
+      })
+    }
   }
 }
 </script>

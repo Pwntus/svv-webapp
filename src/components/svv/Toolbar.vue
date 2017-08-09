@@ -1,13 +1,14 @@
 <template lang="pug">
 #svv-toolbar
-  md-toolbar.md-dense(
+  md-toolbar(
     :class="{ scrolled }"
     md-theme="toolbar"
   )
     img(src="../../assets/tmp.png")
+    img(src="../../assets/tmp_telenor.png")
     h2.md-title(
       @click="$router.push('/')"
-    ) Road Monitoring
+    ) Aurora Borealis Road Monitoring
     .flex
     md-button.md-primary(
       v-if="!AppUser"
@@ -58,7 +59,8 @@ export default {
   right: 0;
 
   .md-toolbar {
-    background-color: rgba(68, 79, 85, .75);
+    background-color: rgba(255, 255, 255, .75);
+    //background-color: rgba(68, 79, 85, .75);
     //background-color: rgba(0, 0, 0, .75);
 
     &.scrolled {
@@ -67,11 +69,11 @@ export default {
     }
 
     img {
-      margin-right: 5px;
+      margin-right: 10px;
     }
 
     .md-title {
-      color: #FFF;
+      color: #424242;
       cursor: pointer;
     }
   }

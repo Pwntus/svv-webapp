@@ -19,6 +19,9 @@ Vue.material.registerTheme('default', {
 })
 
 Vue.material.registerTheme('toolbar', {
-  primary: 'white',
+  primary: {
+    color: 'grey',
+    hue: '800'
+  },
   background: 'blue-grey'
 })

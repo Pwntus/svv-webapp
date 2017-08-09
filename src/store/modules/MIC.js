@@ -215,7 +215,7 @@ const actions = {
       let thingName = topic.split('/').pop()
 
       // Hack, filter out undesired things
-      if (thingName !== '00000618' && thingName !== '00000625')
+      if (thingName !== '00000618' && thingName !== '00000625' && thingName !== '00000562')
         return
 
       let reported = JSON.parse(message).state.reported
@@ -235,7 +235,7 @@ const getters = {
     return state.things
   },
   regThings: (state) => {
-    let inactive = + new Date() - 3 * 60 * 60 * 1000
+    let inactive = + new Date() - 1 * 60 * 60 * 1000
 
     return state.things.reduce((a, b) => {
       if (b.pos !== 'None,None' && b.timestamp > inactive)
@@ -244,7 +244,7 @@ const getters = {
     }, [])
   },
   unregThings: (state) => {
-    let inactive = + new Date() - 3 * 60 * 60 * 1000
+    let inactive = + new Date() - 1 * 60 * 60 * 1000
 
     return state.things.reduce((a, b) => {
       if (b.pos == 'None,None' || b.timestamp <= inactive)
