@@ -19,20 +19,20 @@ const mutations = {
 
 const actions = {
   init ({commit, dispatch}) {
-    MIC.init(MIC_HOSTNAME)
+    return MIC.init(MIC_HOSTNAME)
       .then(()    => { return dispatch('lsGet') })
       .then(token => { return MIC.getCredentials(token) })
       .then(()    => { commit(t.APP_SET_INITED, true) })
       .catch(err  => {
-        MIC.refreshCredentials()
+        return MIC.refreshCredentials()
           .then(account => {
             commit(t.APP_SET_USER, account.user)
             dispatch('lsSet', account)
             commit(t.APP_SET_INITED, true)
           })
           .catch(err    => {
-            alert('Failed to authenticate')
-            console.log(err)
+            console.log('Failed to authenticate')
+            return Promise.reject()
           })
       })
   },

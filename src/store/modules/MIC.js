@@ -114,15 +114,11 @@ const actions = {
     let payload = {
       action: 'FIND',
       query: {
-        size: 10,
+        size: 100,
         from: 0,
-        sort: { 'label.lowercase': 'asc' },
-        filter: {
-          bool: {
-            must: [{
-              term: { thingType: MIC_THING_TYPE_ID }
-            }]
-    } } } }
+        query: { bool: { filter: { term: { thingType: MIC_THING_TYPE_ID } } } }
+      }
+    }
 
     return MIC.invoke('ThingLambda', payload)
       .then(data => { return data.hits.hits })
@@ -143,24 +139,26 @@ const actions = {
       let payload = {
         action: 'FIND',
         query: {
-          size: 1,
+          size: 100,
           _source: ['state.pos', 'timestamp', 'thingName'],
           sort: { timestamp: { order: 'desc' } },
-          filter: {
+          query: {
             bool: {
-              must: [
-                { terms: { thingName: [thingName] } },
-                { range: { timestamp: {
-                  gte: (Date.now() - 360 * 24 * 60 * 60 * 1000),
-                  lte: Date.now()
-                } } },
-                { exists: { field: 'state.pos' } }
-              ],
-              must_not: [
-                { match: { 'state.pos': 'None,None' } }
-              ],
-              minimum_should_match: 1
-            } } } }
+              filter: {
+                bool: {
+                  must: [
+                    { term: { thingName: thingName } },
+                    { range: { timestamp: {
+                      gte: (Date.now() - 360 * 24 * 60 * 60 * 1000),
+                      lte: Date.now()
+                    } } },
+                    { exists: { field: 'state.pos' } }
+                  ],
+                  must_not: [
+                    { match: { 'state.pos': 'None,None' } }
+                  ],
+                  minimum_should_match: 1
+          } } } } } }
 
       return MIC.invoke('ObservationLambda', payload)
         .then(data => { return data.hits.hits })
@@ -181,25 +179,27 @@ const actions = {
     let payload = {
       action: 'FIND',
       query: {
-        size: 1000,
+        size: 100,
         _source: ['state.bat', 'state.tmp', 'state.hum', 'timestamp'],
         sort: { timestamp: { order: 'desc' } },
-        filter: {
+        query: {
           bool: {
-            must: [
-              { terms: { thingName: [thingName] } },
-              { range: { timestamp: {
-                gte: (Date.now() - 2 * 24 * 60 * 60 * 1000),
-                lte: Date.now()
-              } } }
-            ],
-            minimum_should_match: 1,
-            should: [
-              { exists: { field: 'state.bat' } },
-              { exists: { field: 'state.tmp' } },
-              { exists: { field: 'state.hum' } }
-            ]
-          } } } }
+            filter: {
+              bool: {
+                must: [
+                  { term: { thingName: thingName } },
+                  { range: { timestamp: {
+                    gte: (Date.now() - 2 * 24 * 60 * 60 * 1000),
+                    lte: Date.now()
+                  } } }
+                ],
+                minimum_should_match: 1,
+                should: [
+                  { exists: { field: 'state.bat' } },
+                  { exists: { field: 'state.tmp' } },
+                  { exists: { field: 'state.hum' } }
+                ]
+        } } } } } }
 
     return MIC.invoke('ObservationLambda', payload)
       .then(data => { return data.hits.hits })

@@ -11,7 +11,7 @@ Vue.use(Router)
 
 export default new Router({
   mode: 'history',
-  base: '/startiot/svv',
+  base: '/svv',
   routes: [
     { path: '/', component: Login },
     { path: '/logout', component: Logout },

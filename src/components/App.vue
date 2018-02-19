@@ -20,6 +20,10 @@ export default {
   },
   mounted () {
     this.$store.dispatch('App/init')
+      .catch(e => {
+        this.$store.dispatch('App/logout')
+        this.$router.push('/')
+      })
   }
 }
 </script>
